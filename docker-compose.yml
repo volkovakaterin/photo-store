@@ -1,19 +1,33 @@
-version: '3'
+version: '3.8'
 
 services:
   payload:
-    image: node:18-alpine
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PAYLOAD_SECRET: ${PAYLOAD_SECRET}
+        DATABASE_URI: ${DATABASE_URI}
+    environment:
+      - PAYLOAD_SECRET=${PAYLOAD_SECRET}
+      - DATABASE_URI=mongodb://mongo:27017/mydatabase
     ports:
       - '3000:3000'
-    volumes:
-      - .:/home/node/app
-      - node_modules:/home/node/app/node_modules
-    working_dir: /home/node/app/
-    command: sh -c "yarn install && yarn dev"
-    depends_on:
-      - mongo
     env_file:
       - .env
+    volumes:
+      - node_modules:/home/node/app/node_modules # Для разработки
+    working_dir: /home/node/app/
+    command: 'npm dev'
+    depends_on:
+      - mongo
+    # profiles:
+    #   - dev
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000']
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   mongo:
     image: mongo:latest
@@ -24,7 +38,12 @@ services:
     volumes:
       - data:/data/db
     logging:
-      driver: none
+      driver: 'json-file'
+    healthcheck:
+      test: ['CMD-SHELL', "mongosh --eval 'db.adminCommand({ ping: 1 })' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
 volumes:
   data:

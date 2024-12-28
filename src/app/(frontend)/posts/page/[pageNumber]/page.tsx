@@ -9,16 +9,17 @@ import React from 'react'
 import PageClient from './page.client'
 import { notFound } from 'next/navigation'
 
-export const revalidate = 600
+export const dynamic = 'force-dynamic'
 
 type Args = {
-  params: Promise<{
-    pageNumber: string
-  }>
+  params: {
+    pageNumber?: string
+  }
 }
 
-export default async function Page({ params: paramsPromise }: Args) {
-  const { pageNumber } = await paramsPromise
+// 2. Компонент страницы — теперь рендерится на каждом запросе (SSR)
+export default async function Page({ params }: Args) {
+  const pageNumber = params.pageNumber
   const payload = await getPayload({ config: configPromise })
 
   const sanitizedPageNumber = Number(pageNumber)
@@ -62,30 +63,10 @@ export default async function Page({ params: paramsPromise }: Args) {
   )
 }
 
-export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
-  const { pageNumber } = await paramsPromise
+
+export async function generateMetadata({ params }: Args): Promise<Metadata> {
+  const { pageNumber } = params
   return {
     title: `Payload Website Template Posts Page ${pageNumber || ''}`,
   }
-}
-
-export async function generateStaticParams() {
-  const payload = await getPayload({ config: configPromise })
-  const posts = await payload.find({
-    collection: 'posts',
-    depth: 0,
-    limit: 10,
-    draft: false,
-    overrideAccess: false,
-  })
-
-  const pages: { pageNumber: string }[] = []
-
-  if (posts.totalPages) {
-    for (let i = 1; i <= posts.totalPages; i++) {
-      pages.push({ pageNumber: String(i) })
-    }
-  }
-
-  return pages
 }

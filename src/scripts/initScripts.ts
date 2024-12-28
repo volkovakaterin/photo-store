@@ -15,4 +15,6 @@ start().catch((err) => {
     console.error('Ошибка при инициализации Payload:', err);
 });
 
+console.log('Payload secret:', process.env.PAYLOAD_SECRET);
+
 

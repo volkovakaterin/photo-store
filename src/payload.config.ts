@@ -27,6 +27,8 @@ import createArchive from './endpoints/createArchive'
 import { FunctionalMode } from './FunctionalMode/config'
 
 
+console.log('Build time secret:', process.env.PAYLOAD_SECRET);
+
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)

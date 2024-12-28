@@ -8,11 +8,13 @@ import { Post } from '@/payload-types'
 import { Search } from '@/search/Component'
 import PageClient from './page.client'
 
+
 type Args = {
-  searchParams: Promise<{
-    q: string
-  }>
+  searchParams: {
+    q?: string
+  }
 }
+
 export default async function Page({ searchParams: searchParamsPromise }: Args) {
   const { q: query } = await searchParamsPromise
   const payload = await getPayload({ config: configPromise })
@@ -23,31 +25,31 @@ export default async function Page({ searchParams: searchParamsPromise }: Args) 
     limit: 12,
     ...(query
       ? {
-          where: {
-            or: [
-              {
-                title: {
-                  like: query,
-                },
+        where: {
+          or: [
+            {
+              title: {
+                like: query,
               },
-              {
-                'meta.description': {
-                  like: query,
-                },
+            },
+            {
+              'meta.description': {
+                like: query,
               },
-              {
-                'meta.title': {
-                  like: query,
-                },
+            },
+            {
+              'meta.title': {
+                like: query,
               },
-              {
-                slug: {
-                  like: query,
-                },
+            },
+            {
+              slug: {
+                like: query,
               },
-            ],
-          },
-        }
+            },
+          ],
+        },
+      }
       : {}),
   })
 
